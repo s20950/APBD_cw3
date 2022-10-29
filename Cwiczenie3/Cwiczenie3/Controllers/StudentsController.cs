@@ -29,29 +29,27 @@ namespace Cwiczenie3.Controllers
         [HttpGet("{studentIndex}")]
         public IActionResult Get([FromRoute]string studentIndex)
         {
-            return Ok(_db.GetStudent(studentIndex));
+            Student student = _db.GetStudent(studentIndex);
+            if (student == null) return NotFound("No records found");
+            return Ok(student);
         }
 
         // POST api/<StudentsController>
         [HttpPost]
         public IActionResult Post([FromBody] Student student)
         {
-            try
-            {
-                return Ok(_db.CreateStudent(student));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
+            int recordsChanged = _db.CreateStudent(student);
+            if (recordsChanged == 0) return BadRequest();
+            return Ok($"Added {recordsChanged} record");
         }
 
         // PUT api/<StudentsController>/5
         [HttpPut("{studentIndex}")]
         public IActionResult Put([FromRoute]string studentIndex, [FromBody] Student student)
         {
-            return Ok(_db.UpdateStudent(studentIndex, student));
+            int recordsChanged = _db.UpdateStudent(studentIndex,student);
+            if (recordsChanged == 0) return BadRequest();
+            return Ok($"Modified {recordsChanged} record");
         }
 
         // DELETE api/<StudentsController>/5
@@ -60,7 +58,8 @@ namespace Cwiczenie3.Controllers
         {
             try
             {
-                return Ok(_db.DeleteStudent(studentIndex));
+                int recordsChanged = _db.DeleteStudent(studentIndex);
+                return Ok($"Removed {recordsChanged} record");
             }
             catch (NullReferenceException ex)
             {

@@ -27,17 +27,13 @@ namespace Cwiczenie3.Services
             return student;
         }
 
-        public string CreateStudent(Student student)
+        public int CreateStudent(Student student)
         {
             var students = GetStudents();
             var s = students.Find(s => s.indexNumber.Equals(student.indexNumber));
             if (s != null)
                 throw new DuplicateIndexException("Student with the same index already exists");
-            var pattern = "s[0-9]+";
-            var rx = new Regex(pattern);
-            if (!Regex.IsMatch(student.indexNumber, pattern))
-                throw new InvalidIndexException("Index has incorrect format");
-
+           
             Student st = new Student(
                 student.firstName,
                 student.lastName,
@@ -49,39 +45,31 @@ namespace Cwiczenie3.Services
                 student.mothersName,
                 student.fathersName
             );
-            var studentToAdd = st.ToString();
-            File.AppendAllText(path, "\n" + studentToAdd);
+            File.AppendAllText(path, "\n" + st.ToString());
 
-            return "Student added";
+            return 1;
         }
 
-        public string UpdateStudent(string studentIndex, Student student)
+        public int UpdateStudent(string studentIndex, Student student)
         {
             var students = File.ReadAllLines(path).Select(Student.FromCsv).ToList();
-            foreach (var s in students)
+            bool studentFound = false;
+            int studentListIndex = students.FindIndex(0, s => s.indexNumber.Equals(student.indexNumber));
+            if (studentListIndex != -1)
             {
-                if (s.indexNumber.Equals(studentIndex))
-                {
-                    s.firstName = student.firstName;
-                    s.lastName = student.lastName;
-                    s.birthDay = student.birthDay;
-                    s.course = student.course;
-                    s.studyMode = student.studyMode;
-                    s.email = student.email;
-                    s.mothersName = student.mothersName;
-                    s.fathersName = student.fathersName;
-                }
+                students[studentListIndex] = student;
+                StringBuilder sb = new StringBuilder();
+                students.ForEach(s => sb.AppendLine(s.ToString()));
+                string trimmedString = sb.ToString().Trim();
+                File.WriteAllText(path, string.Join("\n", trimmedString.Split("\n")));
+
+                return 1;
             }
 
-            StringBuilder sb = new StringBuilder();
-            students.ForEach(s => sb.AppendLine(s.ToString()));
-            string trimmedString = sb.ToString().Trim();
-            File.WriteAllText(path, string.Join("\n", trimmedString.Split("\n")));
-
-            return "Student updated";
+            return 0;
         }
 
-        public string DeleteStudent(string studentIndex)
+        public int DeleteStudent(string studentIndex)
         {
             var students = File.ReadAllLines(path).Select(Student.FromCsv).ToList();
             if (students.Remove(students.Find(s => s.indexNumber.Equals(studentIndex))))
@@ -90,12 +78,10 @@ namespace Cwiczenie3.Services
                 students.ForEach(s => sb.AppendLine(s.ToString()));
                 string trimmedString = sb.ToString().Trim();
                 File.WriteAllText(path, string.Join("\n", trimmedString.Split("\n")));
-                return "Student removed";
+                return 1;
             }
-            else
-            {
-                throw new NullReferenceException("Student doesn't exist");
-            }
+
+            return 0;
         }
 
         public void CreateDb(string path)

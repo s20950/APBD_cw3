@@ -8,9 +8,9 @@ namespace Cwiczenie3.Services
         //crud
         List<Student> GetStudents();
         Student GetStudent(string studentIndex);
-        string CreateStudent(Student student);
-        string UpdateStudent(string studentIndex, Student student);
-        string DeleteStudent(string studentIndex);
+        int CreateStudent(Student student);
+        int UpdateStudent(string studentIndex, Student student);
+        int DeleteStudent(string studentIndex);
         void CreateDb(string path);
 
     }
